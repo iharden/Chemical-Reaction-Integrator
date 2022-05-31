@@ -37,7 +37,15 @@ $ 2 CH3OH -> CH3OCH3 + H2O $ Not okay, specifiers include numbers!
 
 The middle column is mandatory as well and specifies the reaction rate (or activation energy) of the forward reaction. The right column is optional and specifies the reaction rate (or activation energy) of the back reaction. An example of how this window could look like is:
 
+![](Figures/snapshot_3.png?raw=true "Title")
 
+After specifiyng your system hit the "read in system" button. This will check how many different species are present and will create another set of text fields in which you can specify in initial concentration of the individual species. For example:
+
+![](Figures/snapshot_4.png?raw=true "Title")
+
+Afterwards just click "Calculate" and the concentration profiles are computed!
+
+A plot is generated with the concentration profiles of all the species. For a quick overview there is the possibility to use logarithmic x- and y-axes instead of linear scaling. The image and the raw data can easily be exported.
 
 ## Requirements
 
