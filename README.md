@@ -26,7 +26,13 @@ tbd
 
 ## Requirements
 
-Precompiled binaries for Ubuntu and Windows 10 are available and can be used right away. The binaries are dynamically linked to a couple of libraries, which are provided together with the executable. It
+Precompiled binaries for Ubuntu and Windows 10 are available and can be used right away. The binaries are dynamically linked to a couple of libraries, which are provided together with the executable. It is therefore suggested to just Download the corresponding directory (Windows/ or Ubuntu/). Within the directory the executable can be used without further installations.
+The program makes use of a couple of third-party libraries, which are needed in order to compile the source code from scratch:
+
+Qt (https://www.qt.io/?hsLang=en): Creation of the GUI
+QCustomPlot (https://www.qcustomplot.com/): Creation of nice looking Scatter plots within the Qt-framework
+Boost (https://www.boost.org/): Provides the Rosenbrock solver used to integrate the ODE system
+JSON for modern c++ (https://github.com/nlohmann/json): Easy usage of the json file format
 
 ## Contributor
 
