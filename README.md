@@ -22,7 +22,22 @@ The rate constants can be measured in experiment. Alternatively, they can be cal
 For a detailed description of how the program works and how you can use it properly see the next section.
 
 ## Usage
-tbd
+Here we describe the main featues of the program. The basic idea is that in the first step the user provides the necessary information. That is the reaction equation system, the temperature and the reaction rates (or the activation energies). For this the user can use the following text fields:
+
+![](Figures/snapshot_2.png?raw=true "Title")
+
+The left column is mandatory and takes the reaction equation. We strongly advise to stick to simple letters for your system. In any case your identifier for a species is not allowed to contain numbers. As a delimiter between reactands and products you have to use "->". Individual species are seperated by "+".
+Examples:
+
+$ A + 3B + C -> D +E $ Okay, species are $A, B, C, D, E$
+
+$ AX + 2DF -> A + D $ Okay, species are $AX, DF, A, D$
+
+$ 2 CH3OH -> CH3OCH3 + H2O $ Not okay, specifiers include numbers!
+
+The middle column is mandatory as well and specifies the reaction rate (or activation energy) of the forward reaction. The right column is optional and specifies the reaction rate (or activation energy) of the back reaction. An example of how this window could look like is:
+
+
 
 ## Requirements
 
