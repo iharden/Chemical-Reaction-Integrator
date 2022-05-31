@@ -39,7 +39,7 @@ The middle column is mandatory as well and specifies the reaction rate (or activ
 
 ![](Figures/snapshot_3.png?raw=true "Title")
 
-After specifiyng your system hit the "read in system" button. This will check how many different species are present and will create another set of text fields in which you can specify in initial concentration of the individual species. For example:
+After specifying your system hit the "read in system" button. This will check how many different species are present and will create another set of text fields in which you can specify in initial concentration of the individual species. For example:
 
 ![](Figures/snapshot_4.png?raw=true "Title")
 
@@ -56,6 +56,11 @@ One last important feature: It is possible to safe and load the current state vi
 ![](Figures/snapshot_6.png?raw=true "Title")
 
 As file format we use `.chemsys` which is just a text file containing all the reaction equations, barriers, initial concentrations and settings.
+
+The final overview of the window:
+
+![](Figures/snapshot_7.png?raw=true "Title")
+
 
 ## Requirements
 
