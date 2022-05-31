@@ -47,6 +47,16 @@ Afterwards just click "Calculate" and the concentration profiles are computed!
 
 A plot is generated with the concentration profiles of all the species. For a quick overview there is the possibility to use logarithmic x- and y-axes instead of linear scaling. The image and the raw data can easily be exported.
 
+
+![](Figures/snapshot_5.png?raw=true "Title")
+
+One last important feature: It is possible to safe and load the current state via the `save` and `load` buttons:
+
+
+![](Figures/snapshot_6.png?raw=true "Title")
+
+As file format we use `.chemsys` which is just a text file containing all the reaction equations, barriers, initial concentrations and settings.
+
 ## Requirements
 
 Precompiled binaries for Ubuntu and Windows 10 are available and can be used right away. The binaries are dynamically linked to a couple of libraries, which are provided together with the executable. It is therefore suggested to just Download the corresponding directory (Windows/ or Ubuntu/). Within the directory the executable can be used without further installations.
