@@ -26,6 +26,15 @@
    <enum>Qt::ToolButtonIconOnly</enum>
   </property>
   <widget class="QWidget" name="centralwidget">
+   <property name="minimumSize">
+    <size>
+     <width>1578</width>
+     <height>0</height>
+    </size>
+   </property>
+   <property name="autoFillBackground">
+    <bool>true</bool>
+   </property>
    <widget class="QCommandLinkButton" name="generate_system">
     <property name="geometry">
      <rect>
@@ -37,6 +46,7 @@
     </property>
     <property name="font">
      <font>
+      <family>Segoe UI</family>
       <pointsize>14</pointsize>
      </font>
     </property>
@@ -73,8 +83,8 @@
       <rect>
        <x>0</x>
        <y>0</y>
-       <width>355</width>
-       <height>464</height>
+       <width>352</width>
+       <height>434</height>
       </rect>
      </property>
      <property name="layoutDirection">
@@ -383,8 +393,8 @@
       <rect>
        <x>0</x>
        <y>0</y>
-       <width>285</width>
-       <height>464</height>
+       <width>282</width>
+       <height>434</height>
       </rect>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -660,21 +670,12 @@
     </property>
     <property name="font">
      <font>
+      <family>Segoe UI</family>
       <pointsize>14</pointsize>
      </font>
     </property>
     <property name="text">
      <string>Calculate!</string>
-    </property>
-   </widget>
-   <widget class="QCustomPlot" name="customPlot" native="true">
-    <property name="geometry">
-     <rect>
-      <x>590</x>
-      <y>100</y>
-      <width>761</width>
-      <height>621</height>
-     </rect>
     </property>
    </widget>
    <widget class="QCheckBox" name="xlog">
@@ -866,14 +867,23 @@
      <string>Backward reaction(optional)</string>
     </property>
    </widget>
+   <widget class="QChartView" name="chartview">
+    <property name="geometry">
+     <rect>
+      <x>580</x>
+      <y>120</y>
+      <width>751</width>
+      <height>601</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QCustomPlot</class>
-   <extends>QWidget</extends>
-   <header>qcustomplot.h</header>
-   <container>1</container>
+   <class>QChartView</class>
+   <extends>QGraphicsView</extends>
+   <header>QtCharts</header>
   </customwidget>
  </customwidgets>
  <resources/>

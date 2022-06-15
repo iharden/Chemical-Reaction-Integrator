@@ -1,4 +1,5 @@
 QT       += core gui
+QT       += charts
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
@@ -10,22 +11,20 @@ CONFIG += c++17
 
 INCLUDEPATH += C:\Boost_1_79_0
 INCLUDEPATH += C:\single_headers
-INCLUDEPATH += C:\Qt\Tools\mingw810_64\lib\gcc\x86_64-w64-mingw32\8.1.0\include #for omp.h if needed, might be problematic for deployment (.dll stuff)
+#INCLUDEPATH += C:\Qt\Tools\mingw810_64\lib\gcc\x86_64-w64-mingw32\8.1.0\include #for omp.h if needed, might be problematic for deployment (.dll stuff)
 
 SOURCES += \
     class_system.cpp \
     functions.cpp \
     integrator.cpp \
     main.cpp \
-    mainwindow.cpp \
-    qcustomplot.cpp
+    mainwindow.cpp
 
 HEADERS += \
     class_system.hpp \
     functions.hpp \
     integrator.hpp \
-    mainwindow.h \
-    qcustomplot.h
+    mainwindow.h
 
 FORMS += \
     mainwindow.ui

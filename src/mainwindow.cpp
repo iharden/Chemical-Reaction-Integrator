@@ -47,7 +47,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->lineEdit_35->setVisible(false);
     ui->lineEdit_36->setVisible(false);
     ui->calculateButton->setVisible(false);
-    ui->customPlot->setVisible(false);
+    ui->chartview->setVisible(false);
     ui->xlog->setVisible(false);
     ui->ylog->setVisible(false);
     ui->pushRawdata->setVisible(false);
@@ -344,104 +344,211 @@ void MainWindow::do_calculation() {
     //------------------------------------------------------------------------
     //
     // Now we have to do the plotting
-    // Prepare QVectors, colors, get ranges for axes etc.
+    // Prepare colors, get ranges for axes etc.
     //------------------------------------------------------------------------
 
-    QVector<double> qtimes = QVector<double>(times.begin(),times.end());
-    vector<QVector<double>> qx(x_vec.size());
-    for(int i=0;i<qx.size();++i)
-        qx[i]=QVector<double>(x_vec[i].begin(),x_vec[i].end());
 
-    array<QColor,16> colors{Qt::black, Qt::red, Qt::blue, Qt::green,
-                         Qt::yellow, Qt::cyan, Qt::magenta, Qt::gray,
-                         Qt::darkRed, Qt::darkGreen, Qt::darkBlue, Qt::darkCyan, Qt::darkMagenta,
-                         Qt::darkYellow, Qt::darkGray, Qt::lightGray};
-
-    double miny=1e7, maxy=0.0;
-    double tmp;
-    for(auto& v:x_vec) {
-        tmp=*min_element(v.begin(), v.end());
-        if(tmp<miny)
-            miny=tmp;
-        tmp= *max_element(v.begin(), v.end());
-        if(tmp>maxy)
-            maxy=tmp;
-    }
-
-    ui->customPlot->setVisible(true);
+    // Enable visibility of widgets
+    ui->chartview->setVisible(true);
     ui->xlog->setVisible(true);
     ui->ylog->setVisible(true);
     ui->pushRawdata->setVisible(true);
     ui->pushPng->setVisible(true);
-    ui->customPlot->clearGraphs();      // important for replotting
+    ui->xlog->setChecked(false);
+    ui->ylog->setChecked(false);
 
-    for(int i=0;i<x_vec.size();++i) {
-        ui->customPlot->addGraph();
-        ui->customPlot->graph(i)->setData(qtimes, qx[i]);
-        ui->customPlot->graph(i)->setName(qlabels[i]);
-        if(x_vec.size()>16) {
-            int n=i/16;
-            ui->customPlot->graph(i)->setPen(QPen(colors[i-n*16]));
+    // Colors for individual line plots
+    array<QColor, 16> colors{ Qt::black, Qt::red, Qt::blue, Qt::green,
+                         Qt::yellow, Qt::cyan, Qt::magenta, Qt::gray,
+                         Qt::darkRed, Qt::darkGreen, Qt::darkBlue, Qt::darkCyan, Qt::darkMagenta,
+                         Qt::darkYellow, Qt::darkGray, Qt::lightGray };
+
+    // get min/max concentrations
+    double miny = 1e7, maxy = 0.0;
+    double tmp;
+    for (auto& v : x_vec) {
+        tmp = *min_element(v.begin(), v.end());
+        if (tmp < miny)
+            miny = tmp;
+        tmp = *max_element(v.begin(), v.end());
+        if (tmp > maxy)
+            maxy = tmp;
+    }
+ 
+    // Create axes
+    QValueAxis* axisX = new QValueAxis();
+    axisX->setTitleText("Time [s]");
+    axisX->setLabelFormat("%i");
+    axisX->setTickInterval((t_end - t_start) / 6);
+    axisX->setRange(t_start, t_end);
+
+    QValueAxis* axisY = new QValueAxis();
+    axisY->setTitleText("Concentration [mol/L]");
+    axisY->setLabelFormat("%f");
+    axisY->setRange(miny, maxy);
+
+    // create the actual data series
+    vector<QLineSeries*> dat(x_vec.size());
+    for (int i = 0; i < dat.size(); ++i) {
+        dat[i] = new QLineSeries();
+        dat[i]->setName(qlabels[i]);
+        for(int j=0;j<times.size();++j) {
+            dat[i]->append(times[j], x_vec[i][j]);
         }
-        else
-            ui->customPlot->graph(i)->setPen(QPen(colors[i]));
+        if (x_vec.size() > 16) {
+            int n = i / 16;
+            dat[i]->setPen(QPen(colors[i - n * 16]));
+        }
+        else {
+            dat[i]->setPen(QPen(colors[i]));
+        } 
+    }
+    
+    QChart* chart = new QChart();
+    chart->legend()->setVisible(true);
+    for(int i=0;i<dat.size();++i) {
+        chart->addSeries(dat[i]);
+    }
+    
+    chart->addAxis(axisX, Qt::AlignBottom);
+    chart->addAxis(axisY, Qt::AlignLeft);
+    //chart->createDefaultAxes();
+
+    // Important: Axes must be first added to the chart and after that attached to the dataseries
+    for (int i = 0; i < dat.size(); ++i) {
+        dat[i]->attachAxis(axisX);
+        dat[i]->attachAxis(axisY);
     }
 
-    ui->customPlot->xAxis->setLabel("time [s]");
-    ui->customPlot->yAxis->setLabel("c [mol/L]");
-    ui->customPlot->xAxis->setRange(t_start, t_end);
-    ui->customPlot->yAxis->setRange(miny, maxy);
-    ui->customPlot->legend->setVisible(true);
-    ui->customPlot->replot();
+    // setChart() does not delete the old chart so in order to free the memory we explicitly delete the old chart (if there is one)
+    if (ui->chartview->chart()->series().size() > 0) {
+        QChart* tmp = ui->chartview->chart();
+        ui->chartview->setChart(chart);
+        ui->chartview->setRenderHint(QPainter::Antialiasing);
+        delete tmp;
+
+    }
+    else {
+        ui->chartview->setChart(chart);
+        ui->chartview->setRenderHint(QPainter::Antialiasing);
+    }
 }
 
 void MainWindow::set_xlog() {
 
-    //--------------------------------------------------------------------------------//
-    //                                                                                //
-    // The idea is actually simple:                                                   //
-    // We need two ticker (one log, one linear). The linear one has to be             //
-    // the default base class Ticker                                                  //
-    // One could consider to create the pointers only once and just to                //
-    // pass it to the functions (but then they are class members... )                 //
-    //                                                                                //
-    // Does this code leak memory? I do not think so...                               //
-    // setTicker() takes a shared_ptr, the first shared_ptr is destroyed when we leave the function     //
-    // When we pass a new shared_ptr to setTicker() the old one is deleted            //
-    // Since it was the last instance, the object gets destroyed as well              //
-    //--------------------------------------------------------------------------------//
+    double t_start = ui->lineEdit_31->text().toDouble();
+    double t_end = ui->lineEdit_32->text().toDouble();
 
-    QSharedPointer<QCPAxisTickerLog> logTicker(new QCPAxisTickerLog);
-    QSharedPointer<QCPAxisTicker> linTicker(new QCPAxisTicker);
+    if (ui->xlog->isChecked()) {
 
-    if(ui->xlog->isChecked()) {
-        ui->customPlot->xAxis->setScaleType(QCPAxis::stLogarithmic);
-        ui->customPlot->xAxis->setTicker(logTicker);
-        ui->customPlot->replot();
+        // get smallest potence of 10 to the lowest time-point that is not zero
+        double tp = times[1];
+        double pot = 1.0;
+        while (tp < pot)
+            pot /= 10;
+
+        // define logarithmic axis
+        QLogValueAxis* axisXLog = new QLogValueAxis();
+        axisXLog->setTitleText("Time [s]");
+        axisXLog->setLabelFormat("%4.1e");
+        axisXLog->setRange(pot, t_end);
+        axisXLog->setBase(10.0);
+
+        // remove previous x-axis (presumbly) and add new axis
+        for (auto axis : ui->chartview->chart()->axes(Qt::Horizontal))
+            ui->chartview->chart()->removeAxis(axis); 
+        ui->chartview->chart()->addAxis(axisXLog, Qt::AlignBottom);
+
+        // make sure that no Points with t==0 are included. dynamic_cast is necessary because QAbstractSeries* does not have remove()
+        for (auto series : ui->chartview->chart()->series()) {
+            QLineSeries* ptr = dynamic_cast<QLineSeries*>(series);
+            if(ptr->points()[0].rx() == 0)
+                ptr->remove(0);
+            ptr->attachAxis(axisXLog);
+        }
+        ui->chartview->update();
     }
-
     else {
-        ui->customPlot->xAxis->setScaleType(QCPAxis::stLinear);
-        ui->customPlot->xAxis->setTicker(linTicker);
-        ui->customPlot->replot();
+        QValueAxis* axisX = new QValueAxis();
+        axisX->setTitleText("Time [s]");
+        axisX->setLabelFormat("%i");
+        axisX->setTickInterval((t_end - t_start) / 6);
+        axisX->setRange(t_start, t_end);
+
+        for (auto axis : ui->chartview->chart()->axes(Qt::Horizontal))
+            ui->chartview->chart()->removeAxis(axis);
+        ui->chartview->chart()->addAxis(axisX, Qt::AlignBottom);
+
+        for (auto series : ui->chartview->chart()->series()) {
+            series->attachAxis(axisX);      
+        }
+        ui->chartview->update();
     }
 }
 
 void MainWindow::set_ylog() {
 
-    QSharedPointer<QCPAxisTickerLog> logTicker(new QCPAxisTickerLog);
-    QSharedPointer<QCPAxisTicker> linTicker(new QCPAxisTicker);
-
-    if(ui->ylog->isChecked()) {
-        ui->customPlot->yAxis->setScaleType(QCPAxis::stLogarithmic);
-        ui->customPlot->yAxis->setTicker(logTicker);
-        ui->customPlot->replot();
+    // get min/max concentrations
+    double miny = 1e7, maxy = 0.0;
+    double tmp;
+    for (auto& v : x_vec) {
+        tmp = *min_element(v.begin(), v.end());
+        if (tmp < miny)
+            miny = tmp;
+        tmp = *max_element(v.begin(), v.end());
+        if (tmp > maxy)
+            maxy = tmp;
     }
 
+    if (ui->ylog->isChecked()) {
+
+        // get min-element that is not zero but above 10e-8
+        double cp=1.0;
+        for (auto& v : x_vec) {
+            for (int i = 0; i < v.size(); ++i) {
+                if (v[i] < cp && v[i]>1e-8)
+                    cp = v[i];
+            }
+        }
+        double pot = 1.0;
+        while (cp < pot)
+            pot /= 10;
+
+        QLogValueAxis* axisYLog = new QLogValueAxis();
+        axisYLog->setTitleText("Concentration [mol/L]");
+        axisYLog->setLabelFormat("%4.1e");
+        axisYLog->setRange(cp, maxy);
+        axisYLog->setBase(10.0);
+
+        for (auto axis : ui->chartview->chart()->axes(Qt::Vertical))
+            ui->chartview->chart()->removeAxis(axis);
+
+        // remove all the points with c==0 (log(0) is not defined)
+        ui->chartview->chart()->addAxis(axisYLog, Qt::AlignLeft);
+        for (auto series : ui->chartview->chart()->series()) {
+            QLineSeries* ptr = dynamic_cast<QLineSeries*>(series);
+            auto Points = ptr->points();
+            for (int i = 0; i < Points.size(); ++i)
+                if (Points[i].ry() == 0)
+                    ptr->remove(i);
+            ptr->attachAxis(axisYLog);
+        }
+        ui->chartview->update();
+    }
     else {
-        ui->customPlot->yAxis->setScaleType(QCPAxis::stLinear);
-        ui->customPlot->yAxis->setTicker(linTicker);
-        ui->customPlot->replot();
+
+        QValueAxis* axisY = new QValueAxis();
+        axisY->setTitleText("Concentration [mol/L]");
+        axisY->setLabelFormat("%f");
+        axisY->setRange(miny, maxy);
+
+        for (auto axis : ui->chartview->chart()->axes(Qt::Vertical))
+            ui->chartview->chart()->removeAxis(axis);
+        ui->chartview->chart()->addAxis(axisY, Qt::AlignLeft);
+        for (auto series : ui->chartview->chart()->series()) {
+            series->attachAxis(axisY);
+        }
+        ui->chartview->update();
     }
 }
 
@@ -754,7 +861,19 @@ void MainWindow::export_png() {
         return;
     }
     else {
-        ui->customPlot->savePng(filename, 0,0,1.0,100);
+
+        const auto dpr = ui->chartview->devicePixelRatioF();
+        QPixmap buffer(ui->chartview->width() * dpr, ui->chartview->height() * dpr);
+        buffer.setDevicePixelRatio(dpr);
+        buffer.fill(Qt::transparent);
+
+        QPainter* paint = new QPainter(&buffer);
+        paint->setPen(*(new QColor(255, 34, 255, 255)));
+        ui->chartview->render(paint);
+       
+        QFile file(filename);
+        file.open(QIODevice::WriteOnly);
+        buffer.save(&file, "PNG");
     }
 }
 

@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created by: Qt User Interface Compiler version 6.0.4
+** Created by: Qt User Interface Compiler version 6.3.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -9,6 +9,7 @@
 #ifndef UI_MAINWINDOW_H
 #define UI_MAINWINDOW_H
 
+#include <QtCharts/QChartView>
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QCheckBox>
@@ -21,7 +22,6 @@
 #include <QtWidgets/QScrollArea>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
-#include "qcustomplot.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -138,7 +138,6 @@ public:
     QLabel *label_11;
     QLabel *label_12;
     QCommandLinkButton *calculateButton;
-    QCustomPlot *customPlot;
     QCheckBox *xlog;
     QCheckBox *ylog;
     QLineEdit *lineEdit_34;
@@ -154,6 +153,7 @@ public:
     QPushButton *pushPng;
     QLabel *label_17;
     QLabel *label_18;
+    QChartView *chartview;
 
     void setupUi(QMainWindow *MainWindow)
     {
@@ -166,10 +166,13 @@ public:
         MainWindow->setToolButtonStyle(Qt::ToolButtonIconOnly);
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
+        centralwidget->setMinimumSize(QSize(1578, 0));
+        centralwidget->setAutoFillBackground(true);
         generate_system = new QCommandLinkButton(centralwidget);
         generate_system->setObjectName(QString::fromUtf8("generate_system"));
         generate_system->setGeometry(QRect(390, 430, 191, 51));
         QFont font;
+        font.setFamilies({QString::fromUtf8("Segoe UI")});
         font.setPointSize(14);
         generate_system->setFont(font);
         generate_system->setAutoFillBackground(true);
@@ -181,7 +184,7 @@ public:
         scrollArea->setWidgetResizable(true);
         scrollAreaWidgetContents = new QWidget();
         scrollAreaWidgetContents->setObjectName(QString::fromUtf8("scrollAreaWidgetContents"));
-        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 355, 464));
+        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 352, 434));
         scrollAreaWidgetContents->setLayoutDirection(Qt::LeftToRight);
         horizontalLayout = new QHBoxLayout(scrollAreaWidgetContents);
         horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
@@ -433,7 +436,7 @@ public:
         label->setObjectName(QString::fromUtf8("label"));
         label->setGeometry(QRect(100, 60, 221, 21));
         QFont font1;
-        font1.setFamily(QString::fromUtf8("Arial"));
+        font1.setFamilies({QString::fromUtf8("Arial")});
         font1.setPointSize(12);
         font1.setBold(true);
         label->setFont(font1);
@@ -485,7 +488,7 @@ public:
         scrollArea_2->setWidgetResizable(true);
         scrollAreaWidgetContents_2 = new QWidget();
         scrollAreaWidgetContents_2->setObjectName(QString::fromUtf8("scrollAreaWidgetContents_2"));
-        scrollAreaWidgetContents_2->setGeometry(QRect(0, 0, 285, 464));
+        scrollAreaWidgetContents_2->setGeometry(QRect(0, 0, 282, 434));
         horizontalLayout_2 = new QHBoxLayout(scrollAreaWidgetContents_2);
         horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
         verticalLayout = new QVBoxLayout();
@@ -694,9 +697,6 @@ public:
         calculateButton->setObjectName(QString::fromUtf8("calculateButton"));
         calculateButton->setGeometry(QRect(320, 740, 141, 51));
         calculateButton->setFont(font);
-        customPlot = new QCustomPlot(centralwidget);
-        customPlot->setObjectName(QString::fromUtf8("customPlot"));
-        customPlot->setGeometry(QRect(590, 100, 761, 621));
         xlog = new QCheckBox(centralwidget);
         xlog->setObjectName(QString::fromUtf8("xlog"));
         xlog->setGeometry(QRect(1220, 730, 131, 19));
@@ -742,6 +742,9 @@ public:
         label_18 = new QLabel(centralwidget);
         label_18->setObjectName(QString::fromUtf8("label_18"));
         label_18->setGeometry(QRect(250, 110, 161, 31));
+        chartview = new QChartView(centralwidget);
+        chartview->setObjectName(QString::fromUtf8("chartview"));
+        chartview->setGeometry(QRect(580, 120, 751, 601));
         MainWindow->setCentralWidget(centralwidget);
 
         retranslateUi(MainWindow);
