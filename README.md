@@ -69,8 +69,6 @@ The program makes use of a couple of third-party libraries, which are needed in 
 
 Qt (https://www.qt.io/?hsLang=en): Creation of the GUI.
 
-QCustomPlot (https://www.qcustomplot.com/): Creation of nice looking Scatter plots within the Qt framework. Header and source file are provided in src/
-
 Boost (https://www.boost.org/): Provides the Rosenbrock solver used to integrate the ODE system. Header-only
 
 JSON for modern c++ (https://github.com/nlohmann/json): Easy usage of the json file format. Header-only
