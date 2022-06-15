@@ -11,7 +11,6 @@ CONFIG += c++17
 
 INCLUDEPATH += C:\Boost_1_79_0
 INCLUDEPATH += C:\single_headers
-#INCLUDEPATH += C:\Qt\Tools\mingw810_64\lib\gcc\x86_64-w64-mingw32\8.1.0\include #for omp.h if needed, might be problematic for deployment (.dll stuff)
 
 SOURCES += \
     class_system.cpp \
