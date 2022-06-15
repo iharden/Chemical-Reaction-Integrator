@@ -29,11 +29,11 @@ Here we describe the main featues of the program. The basic idea is that in the 
 The left column is mandatory and takes the reaction equation. We strongly advise to stick to simple letters for your system. In any case your identifier for a species is not allowed to contain numbers. As a delimiter between reactands and products you have to use "->". Individual species are seperated by "+".
 Examples:
 
-$ A + 3B + C -> D +E $ Okay, species are $A, B, C, D, E$
+$A + 3B + C -> D +E$ Okay, species are $A, B, C, D, E$
 
-$ AX + 2DF -> A + D $ Okay, species are $AX, DF, A, D$
+$AX + 2DF -> A + D$ Okay, species are $AX, DF, A, D$
 
-$ 2 CH3OH -> CH3OCH3 + H2O $ Not okay, specifiers include numbers!
+$2 CH3OH -> CH3OCH3 + H2O$ Not okay, specifiers include numbers!
 
 The middle column is mandatory as well and specifies the reaction rate (or activation energy) of the forward reaction. The right column is optional and specifies the reaction rate (or activation energy) of the back reaction. An example of how this window could look like is:
 
