@@ -6,6 +6,7 @@
 #include <functional>
 #include <algorithm>
 #include <array>
+#include <limits>
 
 #include<json.hpp>
 

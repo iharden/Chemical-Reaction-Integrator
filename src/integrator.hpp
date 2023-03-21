@@ -9,7 +9,7 @@
 namespace integrator {
 
 std::tuple<std::vector<std::vector<double>>, std::vector<double>>
-    do_integration(nlohmann::json j, state_type init, double t_start, double t_end, double step_init=0.0001, double abs_err=1.0e-06, double rel_err=1.0e-06);
+    do_integration(const nlohmann::json& j, const boost::numeric::ublas::vector<double>& init, double t_start, double t_end, double step_init=0.0001, double abs_err=1.0e-06, double rel_err=1.0e-06);
 }
 
 #endif // INTEGRATOR_HPP

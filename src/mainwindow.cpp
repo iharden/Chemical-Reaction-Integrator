@@ -8,7 +8,8 @@
 #include <iostream>
 #include <fstream>
 
-using namespace std;
+using std::vector;
+using std::string;
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -190,7 +191,7 @@ void MainWindow::my_slot() {
     //----------------------------------------------------------------------//
 
     vector<double> fr;
-    for(auto ptr:forward_rates) {
+    for(const auto& ptr:forward_rates) {
         if(ptr->text() != "")
             fr.push_back(ptr->text().toDouble());
     }
@@ -204,7 +205,7 @@ void MainWindow::my_slot() {
     //----------------------------------------------------------------------//
 
     vector<double> br;
-    for(auto ptr:backward_rates) {
+    for(const auto& ptr:backward_rates) {
         if(ptr->text()=="")
             br.push_back(-1.0);
         else
@@ -222,7 +223,7 @@ void MainWindow::my_slot() {
     try {
         J=functions::setup_json(stdlines,fr, br);
     }
-    catch(runtime_error& e) {
+    catch(std::runtime_error& e) {
 
         QString err=e.what();
         QMessageBox::information(this, tr("An error occured!"),err);
@@ -236,7 +237,7 @@ void MainWindow::my_slot() {
     //----------------------------------------------------------------------//
 
     vector<string> labels;
-    int numreact=J["reactions"].size();
+    auto numreact=J["reactions"].size();
     for(int i=0;i<numreact;++i) {
         for(int j=0;j<J["reactions"][i]["reactands"]["Labels"].size();++j)
             labels.push_back(J["reactions"][i]["reactands"]["Labels"][j]);
@@ -298,14 +299,14 @@ void MainWindow::my_slot() {
 
 void MainWindow::do_calculation() {
 
-    //----------------------------------------------------------------------
-    //
-    //                  Read initial concentrations
-    // some redundant stuff from the previously called slot
-    //----------------------------------------------------------------------
+    //----------------------------------------------------------------------//
+    //                                                                      //
+    //                  Read initial concentrations                         //
+    // some redundant stuff from the previously called slot                 //
+    //----------------------------------------------------------------------//
 
     vector<string> labels;
-    int numreact=J["reactions"].size();
+    auto numreact=J["reactions"].size();
     for(int i=0;i<numreact;++i) {
         for(int j=0;j<J["reactions"][i]["reactands"]["Labels"].size();++j)
             labels.push_back(J["reactions"][i]["reactands"]["Labels"][j]);
@@ -318,17 +319,17 @@ void MainWindow::do_calculation() {
 
     vector<QString> qlabels = functions::get_qstring(labels);
 
-    state_type init(qlabels.size());
+    boost::numeric::ublas::vector<double> init(qlabels.size());
     for(int i=0;i<qlabels.size();++i) {
         init[i]=init_conc[i]->text().toDouble();
     }
 
-    //------------------------------------------------------------------------
-    //
-    // Get integration setup and call the integrator
-    // ON OUTPUT: All concentrations (vector<vector<double>>
-    //            and time points (vector<double>)
-    //------------------------------------------------------------------------
+    //------------------------------------------------------------------------//
+    //                                                                        //
+    // Get integration setup and call the integrator                          //
+    // ON OUTPUT: All concentrations (vector<vector<double>>                  //
+    //            and time points (vector<double>)                            //
+    //------------------------------------------------------------------------//
 
     double t_start = ui->lineEdit_31->text().toDouble();
     double t_end = ui->lineEdit_32->text().toDouble();
@@ -341,11 +342,11 @@ void MainWindow::do_calculation() {
     // Therefore no structured binding but rather std::tie()
     tie(x_vec, times) = integrator::do_integration(J, init, t_start, t_end, step_init, abs_err, rel_err);
 
-    //------------------------------------------------------------------------
-    //
-    // Now we have to do the plotting
-    // Prepare colors, get ranges for axes etc.
-    //------------------------------------------------------------------------
+    //------------------------------------------------------------------------//
+    //                                                                        //
+    // Now we have to do the plotting                                         //
+    // Prepare colors, get ranges for axes etc.                               //
+    //------------------------------------------------------------------------//
 
 
     // Enable visibility of widgets
@@ -358,13 +359,13 @@ void MainWindow::do_calculation() {
     ui->ylog->setChecked(false);
 
     // Colors for individual line plots
-    array<QColor, 16> colors{ Qt::black, Qt::red, Qt::blue, Qt::green,
+    std::array<QColor, 16> colors{ Qt::black, Qt::red, Qt::blue, Qt::green,
                          Qt::yellow, Qt::cyan, Qt::magenta, Qt::gray,
                          Qt::darkRed, Qt::darkGreen, Qt::darkBlue, Qt::darkCyan, Qt::darkMagenta,
                          Qt::darkYellow, Qt::darkGray, Qt::lightGray };
 
     // get min/max concentrations
-    double miny = 1e7, maxy = 0.0;
+    double miny = std::numeric_limits<double>::max(), maxy = 0.0;
     double tmp;
     for (auto& v : x_vec) {
         tmp = *min_element(v.begin(), v.end());
@@ -442,7 +443,7 @@ void MainWindow::set_xlog() {
     if (ui->xlog->isChecked()) {
 
         // get smallest potence of 10 to the lowest time-point that is not zero
-        double tp = times[1];
+        double tp = (times[0] == 0) ? times[1] : times[0]; // make sure tp is a number that is NOT zero, but also works if tstart was set to larger than zero
         double pot = 1.0;
         while (tp < pot)
             pot /= 10;
@@ -454,12 +455,12 @@ void MainWindow::set_xlog() {
         axisXLog->setRange(pot, t_end);
         axisXLog->setBase(10.0);
 
-        // remove previous x-axis (presumbly) and add new axis
+        // remove previous x-axis (presumbly (all axes with Qt::Horizontal)) and add new axis
         for (auto axis : ui->chartview->chart()->axes(Qt::Horizontal))
             ui->chartview->chart()->removeAxis(axis); 
         ui->chartview->chart()->addAxis(axisXLog, Qt::AlignBottom);
 
-        // make sure that no Points with t==0 are included. dynamic_cast is necessary because QAbstractSeries* does not have remove()
+        // make sure that no Points with t==0 (log(0) is undefined) are included. dynamic_cast is necessary because QAbstractSeries* does not have remove()
         for (auto series : ui->chartview->chart()->series()) {
             QLineSeries* ptr = dynamic_cast<QLineSeries*>(series);
             if(ptr->points()[0].rx() == 0)
@@ -489,7 +490,7 @@ void MainWindow::set_xlog() {
 void MainWindow::set_ylog() {
 
     // get min/max concentrations
-    double miny = 1e7, maxy = 0.0;
+    double miny = std::numeric_limits<double>::max(), maxy = 0.0;
     double tmp;
     for (auto& v : x_vec) {
         tmp = *min_element(v.begin(), v.end());
@@ -510,6 +511,8 @@ void MainWindow::set_ylog() {
                     cp = v[i];
             }
         }
+
+        // get the correct potence of 10
         double pot = 1.0;
         while (cp < pot)
             pot /= 10;
@@ -522,14 +525,14 @@ void MainWindow::set_ylog() {
 
         for (auto axis : ui->chartview->chart()->axes(Qt::Vertical))
             ui->chartview->chart()->removeAxis(axis);
+        ui->chartview->chart()->addAxis(axisYLog, Qt::AlignLeft);
 
         // remove all the points with c==0 (log(0) is not defined)
-        ui->chartview->chart()->addAxis(axisYLog, Qt::AlignLeft);
         for (auto series : ui->chartview->chart()->series()) {
             QLineSeries* ptr = dynamic_cast<QLineSeries*>(series);
             auto Points = ptr->points();
             for (int i = 0; i < Points.size(); ++i)
-                if (Points[i].ry() == 0)
+                if (Points[i].ry() == 0) // maybe use abs(Points[i].ry()) < 1e-10 or so ?
                     ptr->remove(i);
             ptr->attachAxis(axisYLog);
         }

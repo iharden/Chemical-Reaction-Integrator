@@ -3,38 +3,41 @@
 #include <cctype>
 #include <iostream>
 #include "functions.hpp"
-using namespace std;
-using namespace nlohmann;
-using namespace boost;
+
+using std::vector;
+using std::string;
 
 namespace functions {
-vector<string> get_stdstring(vector<QString> lines) {
+vector<string> get_stdstring(const vector<QString>& lines) {
 
-    vector<string> strings;
-    for_each(lines.begin(), lines.end(), [&strings](const QString& s) {strings.push_back(s.toStdString());});
+    vector<string> strings(lines.size());
+    transform(lines.begin(), lines.end(), strings.begin(), [](const QString& s) {return s.toStdString(); });
     return strings;
 }
 
-vector<QString> get_qstring(vector<string> lines) {
+vector<QString> get_qstring(const vector<string>& lines) {
 
-    vector<QString> strings;
-    for_each(lines.begin(), lines.end(), [&strings](const string& s) {strings.push_back(QString::fromStdString(s));});
+    vector<QString> strings(lines.size());
+    transform(lines.begin(), lines.end(), strings.begin(), [](const string& s) {return QString::fromStdString(s); });
     return strings;
 }
 
-json setup_json(vector<string> lines, vector<double> forward_rates, vector<double> backward_rates) {
+nlohmann::json setup_json(vector<string> lines, const vector<double>& forward_rates, const vector<double>& backward_rates) {
 
-    json j;
-    vector<string> res{};
-    vector<string> all_reactands, all_products;
+    if (lines.empty())
+        throw std::runtime_error("You have to specify at least one reaction equation!");
 
     if(lines.size()!=forward_rates.size())
-        throw runtime_error("Not for all reactions a rate constant oder energy barrier was specified (or vice versa :) )!");
+        throw std::runtime_error("Not for all reactions a rate constant or energy barrier was specified (or vice versa :) )!");
 
-    for (string s : lines) {
+    for (const string& s : lines) {
         if (s.find("->") == string::npos)
-            throw runtime_error("At least one reaction equation does not contain ->");
+            throw std::runtime_error("At least one reaction equation does not contain ->");
     }
+
+    nlohmann::json j;
+    vector<string> res{};
+    vector<string> all_reactands, all_products;
 
     int idx = 0;
     string ABC = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -42,22 +45,24 @@ json setup_json(vector<string> lines, vector<double> forward_rates, vector<doubl
     string onetwothree = "1234567890";
     string tmp;
 
-    for (int i=0;i<lines.size();++i) {
+    for (int lc=0;lc<lines.size();++lc) {
         //remove whitespaces
-        lines[i].erase(remove_if(lines[i].begin(), lines[i].end(), [](unsigned char x) {return isspace(x); }), lines[i].end());
+        lines[lc].erase(remove_if(lines[lc].begin(), lines[lc].end(), [](unsigned char x) {return isspace(x); }), lines[lc].end());
+
         // make reactands and products
-        split(res, lines[i], is_any_of("->"), token_compress_on);
+        boost::split(res, lines[lc], boost::is_any_of("->"), boost::token_compress_on);
 
         // split reactands and products
         all_reactands.clear();
         all_products.clear();
 
         if(res[0].find("+") != string::npos)
-            split(all_reactands, res[0], is_any_of("+"), token_compress_on);
+            boost::split(all_reactands, res[0], boost::is_any_of("+"), boost::token_compress_on);
         else
             all_reactands.push_back(res[0]);
+
         if(res[1].find("+") != string::npos)
-            split(all_products, res[1], is_any_of("+"), token_compress_on);
+            boost::split(all_products, res[1], boost::is_any_of("+"), boost::token_compress_on);
         else
             all_products.push_back(res[1]);
 
@@ -71,6 +76,7 @@ json setup_json(vector<string> lines, vector<double> forward_rates, vector<doubl
             coeff.clear();
             chem.clear();
             tmp = all_reactands[i];
+
             // check if there is a number in reactant
             // maybe better approach: Check only if first char is number, if true check if second char is a number etc. Needs a while Loop
             for(int j = 0;j < tmp.size();++j) {
@@ -127,12 +133,12 @@ json setup_json(vector<string> lines, vector<double> forward_rates, vector<doubl
         j["reactions"][idx]["products"]["Coeffs"] = prod_coeff;
         j["reactions"][idx]["products"]["Labels"] = prod_chem;
 
-        j["reactions"][idx]["rates"] = forward_rates[i];
+        j["reactions"][idx]["rates"] = forward_rates[lc];
 
         ++idx;
 
         // Check if a backward reaction was required
-        if(backward_rates[i]!=-1.0) {
+        if(backward_rates[lc]!=-1.0) {
 
             j["reactions"][idx]["reactands"]["Coeffs"] = prod_coeff;
             j["reactions"][idx]["reactands"]["Labels"] = prod_chem;
@@ -140,7 +146,7 @@ json setup_json(vector<string> lines, vector<double> forward_rates, vector<doubl
             j["reactions"][idx]["products"]["Coeffs"] = react_coeff;
             j["reactions"][idx]["products"]["Labels"] = react_chem;
 
-            j["reactions"][idx]["rates"] = backward_rates[i];
+            j["reactions"][idx]["rates"] = backward_rates[lc];
             idx++;
         }
 
@@ -149,15 +155,15 @@ json setup_json(vector<string> lines, vector<double> forward_rates, vector<doubl
     return j;
 }
 
-vector<double> convert_rates(const vector<double>& r, double T, bool energyinput, QString energyunit) {
+vector<double> convert_rates(const vector<double>& r, double T, bool energyinput, const QString& energyunit) {
 
-    const double R=8.31446261815324;
-    const double kB=1.3380649e-23;
-    const double h=6.62607015e-34;
+    constexpr double R  = 8.31446261815324;
+    constexpr double kB = 1.3380649e-23;
+    constexpr double h  = 6.62607015e-34;
 
-    double kbT = kB*T;
-    double RT  = R*T;
-    double CF=0.0;
+    const double kbT = kB*T;
+    const double RT  = R*T;
+    double CF  = 0.0;
 
     vector<double> rates = r;
 

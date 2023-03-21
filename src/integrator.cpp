@@ -1,12 +1,13 @@
 
 
 #include "integrator.hpp"
-using namespace std;
-using namespace boost::numeric::odeint;
+namespace odeint = boost::numeric::odeint;
+using state_type = boost::numeric::ublas::vector<double>;
+using matrix_type = boost::numeric::ublas::matrix<double>;
 
 namespace integrator {
 
-tuple<vector<vector<double>>, vector<double>> do_integration(nlohmann::json j, state_type init, double t_start, double t_end, double step_init, double abs_err, double rel_err) {
+std::tuple<std::vector<std::vector<double>>, std::vector<double>> do_integration(const nlohmann::json& j, const state_type& init, double t_start, double t_end, double step_init, double abs_err, double rel_err) {
 
     //------------------------------------------------------------------------//
     //                                                                        //
@@ -14,15 +15,12 @@ tuple<vector<vector<double>>, vector<double>> do_integration(nlohmann::json j, s
     // ON OUTPUT: The system and Jacobian Matrix and initial concentrations   //
     //------------------------------------------------------------------------//
     class_system sys(j); // sys() calculates dy/dx
-    class_system_matrix sys_mat(sys); // sys_mat calculates J
+    class_system_jacobi sys_mat(sys); // sys_mat() calculates J
 
-    state_type x(sys.numspecies, 0.0);
+    state_type x = init;
     state_type dxdt(sys.numspecies);
     state_type dfdt(sys.numspecies);
     matrix_type J(sys.numspecies, sys.numspecies);
-
-    for(int i=0;i<x.size();++i)
-        x[i] = init[i];
 
     //-------------------------------------------------------------------------//
     //                                                                         //
@@ -30,16 +28,17 @@ tuple<vector<vector<double>>, vector<double>> do_integration(nlohmann::json j, s
     // ON OUTPUT: Concentrations and time points                               //
     //-------------------------------------------------------------------------//
 
-    vector<vector<double>> x_vec(sys.numspecies);
-    vector<double> times;
-    auto obs = [&](state_type x, double t) {
+    std::vector<std::vector<double>> x_vec(sys.numspecies);
+    std::vector<double> times;
+
+    auto obs = [&x_vec, &times](const state_type& x, double t) {
         for(int i=0;i<x.size();++i)
             x_vec[i].push_back(x[i]);
         times.push_back(t);
     };
 
-    auto stepper = make_controlled<rosenbrock4<double>>(abs_err, rel_err);
-    size_t steps = integrate_adaptive(stepper, make_pair(sys, sys_mat), x, t_start, t_end, step_init, obs);
-    return make_tuple(x_vec,times);
+    auto stepper = odeint::make_controlled<odeint::rosenbrock4<double>>(abs_err, rel_err);
+    [[maybe_unused]] size_t steps = odeint::integrate_adaptive(stepper, std::make_pair(sys, sys_mat), x, t_start, t_end, step_init, obs);
+    return std::make_tuple(x_vec,times);
 }
 }
