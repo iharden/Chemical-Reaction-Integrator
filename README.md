@@ -8,13 +8,13 @@ In molecular chemistry the reaction rates are governed by the activation barrier
 $$\frac{dc_A(t)}{dt} = -k \cdot c_A(t)^2$$
 $k$ is the rate constant and can be obtained from experiment or quantumchemical calculations.
 For a more complicated reaction system the individual concenctrations are coupled to each other, leading to a set of coupled ordinary differential equations (ODE). Please look at the following reaction equation system:
-$$ 2A \rightarrow B, k_1 $$
-$$ B + A \rightarrow C, k_2  $$
+$$2A \rightarrow B, k_1$$
+$$B + A \rightarrow C, k_2$$
 The differential equations for this system are:
-$$ \frac{dc_A(t)}{dt} = -k_1 \cdot c_A(t)^2 - k_2 \cdot c_A(t) \cdot c_B(t) $$
-$$ \frac{dc_B(t)}{dt} = k_1 \cdot c_A(t)^2 - k_2 \cdot c_A(t) \cdot c_B(t) $$
-$$ \frac{dc_C(t)}{dt} = k_2 \cdot c_A(t) \cdot c_B(t) $$
-In order to obtain the indiviual concentration profile, this ODE system must be integrated numerically, given some initial concentrations $c_{A0}, c_{B0}, c_{C0} $.
+$$\frac{dc_A(t)}{dt} = -k_1 \cdot c_A(t)^2 - k_2 \cdot c_A(t) \cdot c_B(t)$$
+$$\frac{dc_B(t)}{dt} = k_1 \cdot c_A(t)^2 - k_2 \cdot c_A(t) \cdot c_B(t)$$
+$$\frac{dc_C(t)}{dt} = k_2 \cdot c_A(t) \cdot c_B(t)$$
+In order to obtain the indiviual concentration profile, this ODE system must be integrated numerically, given some initial concentrations $c_{A0}, c_{B0}, c_{C0}$.
 For a given system of reaction equations, rate constants and initial concentrations the program numerically integrates the ODE system and produces a plot of the species concentrations as a function of time.
 
 The rate constants can be measured in experiment. Alternatively, they can be calculated from the activation energies, which on the other hand can be obtained from quantumchemical calculations (see for example Eyring equation (https://en.wikipedia.org/wiki/Eyring_equation)).
